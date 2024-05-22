@@ -49,7 +49,7 @@ epochs = Config().trainer.epochs
 batch_size = Config().trainer.batch_size
 num_iters = Config().algorithm.num_iters
 log_interval = Config().algorithm.log_interval
-dlg_result_path = f"{Config().params['result_path']}/{os.getpid()}"
+dlg_result_path = f"{Config().params['result_path']}/data{Config().data.random_seed}_{Config().algorithm.attack_method}_{Config().algorithm.defense}/{os.getpid()}"
 dlg_result_headers = [
     "Iteration",
     "Loss",
@@ -101,6 +101,8 @@ class Server(fedavg.Server):
                 "GC",
                 "DP",
                 "Outpost",
+                "MaskDefense",
+                "FeaDefense",
             ]:
                 self.defense_method = Config().algorithm.defense
             else:
@@ -208,8 +210,14 @@ class Server(fedavg.Server):
 
         # Mean and std of data
         if Config().data.datasource == "CIFAR10":
-            data_mean = consts.cifar10_mean
-            data_std = consts.cifar10_std
+            # data_mean = consts.cifar10_mean
+            # data_std = consts.cifar10_std
+            data_mean = [0, 0, 0]
+            data_std = [1, 1, 1]
+        elif Config().data.datasource == "FashionMNIST":
+            data_mean = (0,)
+            data_std = (1,)
+
         elif Config().data.datasource == "CIFAR100":
             data_mean = consts.cifar100_mean
             data_std = consts.cifar100_std
@@ -235,6 +243,8 @@ class Server(fedavg.Server):
             trials = Config().algorithm.trials
 
         logging.info("Running %d Trials", trials)
+        # 新增代码
+        if trials == 0: return
 
         if not self.share_gradients and not self.match_weights:
             # Obtain the local updates from clients
@@ -328,7 +338,8 @@ class Server(fedavg.Server):
                 param, lr=0.01, momentum=0.9, nesterov=True
             )
         elif Config().algorithm.rec_optim == "LBFGS":
-            match_optimizer = torch.optim.LBFGS(param, lr=Config().algorithm.rec_lr)
+            match_optimizer = torch.optim.LBFGS(param, lr=Config().algorithm.rec_lr, history_size=100, max_iter=20)
+            # match_optimizer = torch.optim.LBFGS(param)
 
         # Init learning rate scheduler
         if Config().algorithm.lr_decay:
@@ -531,7 +542,8 @@ class Server(fedavg.Server):
             self.trainer.model.zero_grad()
 
             try:
-                dummy_pred, _ = self.trainer.model(dummy_data)
+                # 更改代码
+                dummy_pred, _ , _ = self.trainer.model(dummy_data)
             except:
                 dummy_pred = self.trainer.model(dummy_data)
 
