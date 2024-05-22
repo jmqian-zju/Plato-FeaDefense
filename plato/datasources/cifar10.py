@@ -23,12 +23,12 @@ class DataSource(base.DataSource):
             else (
                 transforms.Compose(
                     [
-                        transforms.RandomHorizontalFlip(),
-                        transforms.RandomCrop(32, 4),
+                        # transforms.RandomHorizontalFlip(),
+                        # transforms.RandomCrop(32, 4),
                         transforms.ToTensor(),
-                        transforms.Normalize(
-                            [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
-                        ),
+                        # transforms.Normalize(
+                        #     [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+                        # ),
                     ]
                 )
             )
@@ -41,9 +41,9 @@ class DataSource(base.DataSource):
                 transforms.Compose(
                     [
                         transforms.ToTensor(),
-                        transforms.Normalize(
-                            [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
-                        ),
+                        # transforms.Normalize(
+                        #     [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+                        # ),
                     ]
                 )
             )
